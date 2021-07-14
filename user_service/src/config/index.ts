@@ -9,11 +9,9 @@ const environments: string[] = [
 	'SALT',
 	'PORT',
 	'mongoConnect',
-	'CLOUD_NAME',
-	'API_KEY',
-	'API_SECRET',
+	'ACCESS_SECRET',
 	'WHITE_LIST',
-	'AUTH_TOKEN',
+	'REFRESH_SECRET',
 ];
 
 environments.map(

@@ -3,6 +3,7 @@ import Post from '../Models/Post';
 import { convertToAvif } from '../helpers';
 import { uploadImage } from '../helpers/uploadImage';
 import { PostContollerINF } from '../interfaces';
+import { UploadApiResponse } from 'cloudinary';
 
 const PostContoller: PostContollerINF = {};
 
@@ -29,14 +30,18 @@ PostContoller.findPost = async (req: Request, res: Response) => {
 PostContoller.createPost = async (req: Request, res: Response) => {
 	try {
 		const { title, description, content, isFeatured, createdBy } = req.body;
-		let mainImageUrl: string = '';
+		let mainImageUrl: string | undefined |  UploadApiResponse;
+
+		const existingTitledPost = await Post.findOne({ title: title });
+		if (existingTitledPost)
+			return res.status(400).json({ msg: 'title already exist' });
 
 		if (req.file) {
 			const { buffer } = req.file;
 			const newFile = await convertToAvif(buffer);
-			const imageResponse = await uploadImage(newFile);
-			if (typeof imageResponse !== 'undefined')
-				mainImageUrl = imageResponse['secure_url'];
+			mainImageUrl = await uploadImage(newFile);
+			// if (typeof imageResponse !== 'undefined')
+			// 	mainImageUrl = imageResponse['secure_url'];
 		}
 
 		const post = new Post({
@@ -47,11 +52,11 @@ PostContoller.createPost = async (req: Request, res: Response) => {
 			createdBy,
 			mainImageUrl,
 		});
-		if(post) await post.save();
+		if (post) await post.save();
 
 		if (post) return res.status(200).json(post);
 	} catch (error) {
-		return res.status(400).json({ msg: 'no impl', error });
+		return res.status(500).json({ msg: 'no impl', error });
 	}
 };
 

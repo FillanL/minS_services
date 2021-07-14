@@ -1,5 +1,6 @@
 import express, { NextFunction } from 'express';
 import cors, { CorsOptions } from 'cors';
+import cookieParser from "cookie-parser";
 import morgan from 'morgan';
 import config from './config';
 import mongoose from 'mongoose';
@@ -17,12 +18,20 @@ const corsOptions: CorsOptions = {
 	},
 	methods: ['GET', 'POST'],
 	preflightContinue: false,
+	credentials: true,
 };
 
 if (process.env.NODE_ENV !== 'production') app.use(morgan('dev'));
 else app.use(morgan('combined'));
 
 app.use(express.json());
+app.use((req,res,next)=> {
+	console.log(req.cookies)
+	next()
+});
+
+app.use(express.urlencoded({ extended: false }));
+app.use(cookieParser());
 app.use(webAuth);
 app.use(cors(corsOptions));
 app.use(newErrorHandler);
